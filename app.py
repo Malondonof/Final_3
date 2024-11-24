@@ -74,8 +74,8 @@ if st.button("Analizar la imagen"):
 # Sección para convertir texto a audio
 text = st.text_area("Ingrese el texto a escuchar.")
 if st.button("Convertir a Audio"):
-    if text:  # Asegúrate de que exista texto para convertir
-        result, output_path = text_to_speech(text)  # Solo pasamos el texto
+    if text: 
+        result, output_path = text_to_speech(text)
         audio_file = open(output_path, "rb")
         audio_bytes = audio_file.read()
         st.markdown("### Tu audio generado:")
