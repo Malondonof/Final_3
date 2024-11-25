@@ -4,6 +4,12 @@ import base64
 from PIL import Image
 from gtts import gTTS
 import openai
+import pytesseract
+import cv2
+import numpy as np
+
+# Configuración de Pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Cambiar según el sistema operativo
 
 # Función para convertir texto a audio
 def text_to_speech(text):
@@ -31,7 +37,9 @@ if ke:
 uploaded_file = st.file_uploader("Sube una imagen", type=["jpg", "png", "jpeg"])
 
 if uploaded_file:
-    st.image(uploaded_file, caption=uploaded_file.name, use_column_width=True)
+    # Mostrar imagen subida
+    image = Image.open(uploaded_file)
+    st.image(image, caption=uploaded_file.name, use_column_width=True)
 
 # Ingresar detalles adicionales
 show_details = st.checkbox("Adicionar detalles sobre la imagen", value=False)
@@ -46,6 +54,13 @@ if st.button("Analizar la imagen"):
         st.error("Por favor sube una imagen.")
     else:
         with st.spinner("Analizando la imagen..."):
+            # Convertir la imagen a formato compatible con OpenCV
+            image_np = np.array(image)
+            gray_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+            # Reconocimiento de texto con Tesseract
+            extracted_text = pytesseract.image_to_string(gray_image, lang="spa")  # Cambiar "spa" a "eng" si es en inglés
+
             # Crear el prompt de la solicitud
             prompt = (
                 "Eres un lector experto de manga. Describe en español lo que ves en la imagen de forma detallada. "
@@ -53,6 +68,9 @@ if st.button("Analizar la imagen"):
             )
             if show_details and additional_details:
                 prompt += f"\n\nDetalles adicionales proporcionados: {additional_details}"
+
+            if extracted_text.strip():
+                prompt += f"\n\nTexto extraído de la imagen: {extracted_text}"
 
             # Solicitar la descripción a la API de OpenAI
             try:
